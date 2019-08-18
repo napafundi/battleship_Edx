@@ -118,8 +118,8 @@ public class battleship {
 
     /**
      * Checks if the opponents coordinate array is equal to the gameOverTest array filled with zeroes
-     * @param oppArray
-     * @return
+     * @param oppArray opponent's array containing ship coordinates
+     * @return true if game is over, else false
      */
     public static boolean gameOver(int[][] oppArray) {
         if (Arrays.deepEquals(oppArray, gameOverTest)) {
@@ -128,6 +128,12 @@ public class battleship {
         return false;
     }
 
+    /**
+     * Allows the player to place their ships, then places computer ships on the map
+     * @param playerCoords array to be filled with coordinates of player ships
+     * @param compCoords array to be filled with coordinates of computer ships
+     * @param map game map that is updated with player-ship locations for easier attacking
+     */
     public static void placeShips(int[][] playerCoords, int[][] compCoords, String[][] map) {
         // Place player ships
         int x,y;
@@ -168,6 +174,14 @@ public class battleship {
         }
     }
 
+    /**
+     * Take turns guessing coordinates of opponent's ships. Game ends when all of one player's ships have been sunk.
+     * @param playerCoords array containing coordinates of player ships
+     * @param playerGuesses array containing previous guesses so the player doesn't repeat guesses
+     * @param compCoords array containing coordinates of computer ships
+     * @param compGuesses array containing guesses so the computer doesn't repeat guesses
+     * @param map updated with successful and unsuccessful attacks
+     */
     public static void playGame(int[][] playerCoords, ArrayList<int[]> playerGuesses, int[][] compCoords, ArrayList<int[]> compGuesses, String[][] map) {
         while(true) {
             // Player turn
@@ -179,6 +193,7 @@ public class battleship {
             y = scan.nextInt();
             playerGuess[0] = y;
             playerGuess[1] = x;
+            // Check if the player has already guessed this spot, or the guess is outside of the map
             while (checkGuess(playerGuess, playerGuesses) || x < 0 || x > 9 || y < 0 || y > 9) {
                 System.out.println("You've either already attacked this spot, or it's not within the map confines. Try again.");
                 System.out.print("Enter X coordinate for your attack: ");
@@ -188,6 +203,7 @@ public class battleship {
                 playerGuess[0] = y;
                 playerGuess[1] = x;
             }
+            // Check if the guess is the player's own ship (afloat or sunken)
             while (!checkSpot(x, y, playerCoords) || map[y][x].equals("X")) {
                 System.out.println("You cannot attack here! It's your own ship!");
                 System.out.print("Enter X coordinate for your attack: ");
@@ -200,9 +216,11 @@ public class battleship {
             playerGuesses.add(playerGuess);
             int k = y;
             int l = x;
+            // Check if the guess is a hit or miss
             if (checkSpot(playerGuess, compCoords)) {
                 System.out.println("You hit the computer's ship!");
                 map[k][l] = "x";
+                // Check if the computer has any ships left, end game if not
                 if (gameOver(compCoords)) {
                     System.out.println("Congratulations, you've won!");
                     break;
@@ -219,6 +237,7 @@ public class battleship {
             y = (int)(Math.random() * 9);
             compGuess[0] = y;
             compGuess[1] = x;
+            // Check if the computer has guessed here before, or if the computer has a ship there
             while (checkGuess(compGuess, compGuesses) || !checkSpot(x, y, compCoords)) {
                 x = (int)(Math.random() * 9);
                 y = (int)(Math.random() * 9);
@@ -226,9 +245,11 @@ public class battleship {
                 compGuess[1] = x;
             }
             compGuesses.add(compGuess);
+            // Check if the computer's guess was successful or not
             if (checkSpot(compGuess, playerCoords)) {
                 System.out.println("The computer hit your ship!");
                 map[y][x] = "X";
+                // End game if all of player's ships are sunk
                 if (gameOver(playerCoords)) {
                     System.out.println("The computer won! Try again.");
                     break;
